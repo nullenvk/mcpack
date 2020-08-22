@@ -1,8 +1,10 @@
 #!/bin/sh
 
+export LD_LIBRARY_PATH=..
+
 for x in *.c
 do
-    cc -I.. ../obsidian_serialize.a $x
+    cc -I .. $x -L .. -lobsidian_serialize
     ./a.out
 
     if [ $? -eq 0 ]

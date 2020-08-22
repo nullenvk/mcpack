@@ -83,7 +83,7 @@ static int bytebuffer_append(ByteBuffer *buf, unsigned char byte) {
     return 1;
 }
 
-static int bytebuffer_appendx(ByteBuffer *buf, long long x, size_t n) {
+static int bytebuffer_appendx(ByteBuffer *buf, unsigned long long x, size_t n) {
 
     size_t orig_pos = buf->size;
 
@@ -130,16 +130,16 @@ int mc_var_read(ByteBuffer *buf, long long *result, int limit) {
     int num_read = 0;
     *result = 0;
 
-    if (get_left_data(*buf) == 0)
+    if ((buf->size - buf->read_ptr) == 0)
         return -1;
 
     unsigned char read;
 
     do {
-        if (buf->size + num_read >= buf->allocated_size)
+        if (buf->read_ptr + num_read >= buf->size)
             return -1;
 
-        read = buf->data[buf->size + num_read];
+        read = buf->data[buf->read_ptr + num_read];
         int value = (read & 0b01111111);
         *result |= (value << (7 * num_read));
 
@@ -149,12 +149,11 @@ int mc_var_read(ByteBuffer *buf, long long *result, int limit) {
 
     } while ((read & 0b10000000) != 0);
 
-    buf->size += num_read;
+    buf->read_ptr += num_read;
     return num_read;
 }
 
 static int mc_packv(ByteBuffer *buffer, const char *fmt, va_list ap) {
-    //_FmtFlags fmtflags, curflags;
     bytebuffer_init_alloc(buffer);
 
     for(size_t i = 0; i < strlen(fmt); i++) {
@@ -199,7 +198,9 @@ static int mc_packv(ByteBuffer *buffer, const char *fmt, va_list ap) {
 
                 // Long 
             case '8':
-                arg8 = htonll(va_arg(ap, uint64_t));
+                //arg8 = htonll(va_arg(ap, uint64_t));
+                arg8 = va_arg(ap, uint64_t);
+                arg8 = htonll(arg8);
                 buf_err = bytebuffer_appendx(buffer, arg8, 8);
                 break;
 
@@ -249,16 +250,20 @@ int mc_pack(ByteBuffer *buffer, const char *fmt, ...) {
 
 }
 
-static unsigned long long bytebuffer_read_int(ByteBuffer buffer, int bytes) {
-    unsigned long long value = 0;
+static uint64_t bytebuffer_read_int(ByteBuffer buffer, int bytes) {
+    uint64_t value = 0;
 
     for (int i = 0; i < bytes; i++) {
         //value += buffer.data[buffer.pos + i] << (i * 8);
         value = value << 8;
-        value += buffer.data[buffer.size + i];
+        value += buffer.data[buffer.read_ptr + i];
     }
 
     return value;
+}
+
+static size_t get_left_data_read(ByteBuffer buffer) {
+    return buffer.size - buffer.read_ptr;
 }
 
 static int mc_unpackv(ByteBuffer buffer, const char *fmt, va_list ap) {
@@ -286,50 +291,50 @@ static int mc_unpackv(ByteBuffer buffer, const char *fmt, va_list ap) {
             // Byte
             case 'b':
             case '1':
-                if(get_left_data(buffer) < 1)
+                if (get_left_data_read(buffer) < 1)
                     return -1;
 
-                if((arg1 = va_arg(ap, uint8_t*)) != NULL) {
+                if ((arg1 = va_arg(ap, uint8_t *)) != NULL) {
                     *arg1 = bytebuffer_read_int(buffer, 1);
                 }
 
-                buffer.size++;
+                buffer.read_ptr++;
                 break;
 
                 // Short
             case '2':
-                if(get_left_data(buffer) < 2)
+                if (get_left_data_read(buffer) < 2)
                     return -1;
 
-                if((arg2 = va_arg(ap, uint16_t*)) != NULL) {
-                    *arg2 = ntohs(bytebuffer_read_int(buffer, 2));
+                if ((arg2 = va_arg(ap, uint16_t *)) != NULL) {
+                    *arg2 = bytebuffer_read_int(buffer, 2);
                 }
 
-                buffer.size += 2;
+                buffer.read_ptr += 2;
                 break;
 
                 // Int
             case '4':
-                if(get_left_data(buffer) < 4)
+                if (get_left_data_read(buffer) < 4)
                     return -1;
 
-                if((arg4 = va_arg(ap, uint32_t*)) != NULL) {
-                    *arg4 = ntohl(bytebuffer_read_int(buffer, 4));
+                if ((arg4 = va_arg(ap, uint32_t *)) != NULL) {
+                    *arg4 = bytebuffer_read_int(buffer, 4);
                 }
 
-                buffer.size += 4;
+                buffer.read_ptr += 4;
                 break;
 
                 // Long 
             case '8':
-                if(get_left_data(buffer) < 8)
+                if (get_left_data_read(buffer) < 8)
                     return -1;
 
-                if((arg8 = va_arg(ap, uint64_t*)) != NULL) {
-                    *arg8 = ntohll(bytebuffer_read_int(buffer, 8));
+                if ((arg8 = va_arg(ap, uint64_t *)) != NULL) {
+                    *arg8 = bytebuffer_read_int(buffer, 8);
                 }
 
-                buffer.size += 8;
+                buffer.read_ptr += 8;
                 break;
 
                 // VarInt
@@ -360,13 +365,13 @@ static int mc_unpackv(ByteBuffer buffer, const char *fmt, va_list ap) {
                 if (mc_var_read(&buffer, &string_len, VARINT_LIMIT) == -1)
                     return -1;
 
-                if (get_left_data(buffer) < string_len)
+                if (get_left_data_read(buffer) < (size_t)string_len)
                     return -1;
 
                 if (args != NULL)
                     strncpy(args, (const char*)buffer.data + buffer.size, args_len);
 
-                buffer.size += string_len;
+                buffer.read_ptr += string_len;
 
                 break;
 
@@ -375,11 +380,12 @@ static int mc_unpackv(ByteBuffer buffer, const char *fmt, va_list ap) {
                 //break;
         };
 
-        if(buffer.size > buffer.allocated_size)
+        if(buffer.read_ptr > buffer.size) {
             return -1;
+        }
     }
 
-    return buffer.size;
+    return buffer.read_ptr;
 
 }
 
@@ -401,8 +407,9 @@ int mc_unpack_raw(unsigned char *buf, size_t sz, const char *fmt, ...) {
 
     buffer.data = buf;
     buffer.allocated_size = sz;
+    buffer.size = sz;
     buffer.used = 0;
-    buffer.size = 0;
+    buffer.read_ptr = 0;
 
     va_start(ap, fmt);
     ret = mc_unpackv(buffer, fmt, ap);

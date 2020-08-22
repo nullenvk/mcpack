@@ -5,8 +5,8 @@ LDFLAGS :=
 AR ?= ar
 CC ?= clang
 
-LIB_STATIC := obsidian_serialize.a
-LIB_SHARED := obsidian_serialize.so
+LIB_STATIC := libobsidian_serialize.a
+LIB_SHARED := libobsidian_serialize.so
 OBJ = serialize.o 
 
 all: $(LIB_SHARED) $(LIB_STATIC)
