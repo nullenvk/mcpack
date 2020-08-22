@@ -3,32 +3,33 @@
 #include <stdarg.h>
 #include <stdbool.h>
 
+/*
+ * allocated_size - the amount of memory allocated for the data buffer
+ * size - amount of data to parse in data (for unpacking), automatically filled by packing
+ * read_ptr - index of the last element that was parsed by unpacking
+ */
+
 typedef struct {
     unsigned char *data;
-    size_t allocated_size, size;
+    size_t allocated_size, size, read_ptr;
 
     bool allocate, used;
 } ByteBuffer;
-
-typedef struct {
-    int sockfd;
-
-    int compression_threshold;
-
-    bool encryption_enabled;
-} MCConnection;
 
 int mc_pack(ByteBuffer *buffer, const char *fmt, ...);
 int mc_unpack(ByteBuffer buffer, const char *fmt, ...);
 int mc_unpack_raw(unsigned char *buf, size_t sz, const char *fmt, ...);
 
-int mcpkt_pack(ByteBuffer *buffer, int id, const char *fmt, ...);
-int mcpkt_send(MCConnection *conn, int id, const char *fmt, ...);
-int mcpkt_recv(MCConnection *conn, ByteBuffer *buffer);
 
-void bytebuffer_free(ByteBuffer *buffer);
+/*
+ * new - create a buffer for new data
+ * make  - create a buffer containing existing data
+ */ 
 
-MCConnection mcconnection_new(const char *addr, const char *port);
+ByteBuffer *bytebuffer_new();
+void        bytebuffer_new_static(ByteBuffer *buffer, unsigned char *data, size_t size);
+void        bytebuffer_make(ByteBuffer *buffer, unsigned char *data, size_t size);
+void        bytebuffer_free(ByteBuffer *buffer);
 
 #define VARINT_LIMIT 5
 #define VARLONG_LIMIT 10

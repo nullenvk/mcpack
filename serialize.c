@@ -16,6 +16,28 @@
 #define htonll(x) ((1==htonl(1)) ? (x) : ((uint64_t)htonl((x) & 0xFFFFFFFF) << 32) | htonl((x) >> 32))
 #define ntohll(x) ((1==ntohl(1)) ? (x) : ((uint64_t)ntohl((x) & 0xFFFFFFFF) << 32) | ntohl((x) >> 32))
 
+ByteBuffer *bytebuffer_new() {
+    ByteBuffer *buffer = malloc(sizeof(ByteBuffer));
+
+    buffer->allocate = true;
+    buffer->used = false;
+    buffer->data = NULL;
+    buffer->size = 0;
+    buffer->allocated_size = 0;
+    buffer->read_ptr = 0;
+
+    return buffer;
+}
+
+void bytebuffer_new_static(ByteBuffer *buffer, unsigned char *data, size_t size) {
+    buffer->allocate = false;
+    buffer->used = false;
+    buffer->data = data;
+    buffer->size = 0;
+    buffer->allocated_size = size;
+    buffer->read_ptr = 0;
+}
+
 static void bytebuffer_init_alloc(ByteBuffer *buffer) {
     if (buffer->allocate)
         buffer->data = malloc(1);
@@ -77,10 +99,6 @@ static int bytebuffer_appendx(ByteBuffer *buf, long long x, size_t n) {
     return n;
 }
 
-static inline int get_left_data(ByteBuffer buffer) {
-    return buffer.allocated_size - buffer.size;
-}
-
 static int var_append(ByteBuffer *buf, long long value, int limit) {
     unsigned char temp;
     int buf_err;
@@ -108,7 +126,7 @@ static int var_append(ByteBuffer *buf, long long value, int limit) {
     return 0;
 }
 
-static int var_read(ByteBuffer *buf, long long *result, int limit) {
+int mc_var_read(ByteBuffer *buf, long long *result, int limit) {
     int num_read = 0;
     *result = 0;
 
@@ -316,7 +334,7 @@ static int mc_unpackv(ByteBuffer buffer, const char *fmt, va_list ap) {
 
                 // VarInt
             case 'i':
-                if (var_read(&buffer, &argi_val, VARINT_LIMIT) == -1)
+                if (mc_var_read(&buffer, &argi_val, VARINT_LIMIT) == -1)
                     return -1;
 
                 if ((argi = va_arg(ap, int *)) != NULL) {
@@ -326,7 +344,7 @@ static int mc_unpackv(ByteBuffer buffer, const char *fmt, va_list ap) {
 
                 // VarLong
             case 'I':
-                if(var_read(&buffer, &argi_val, VARLONG_LIMIT) == -1)
+                if(mc_var_read(&buffer, &argi_val, VARLONG_LIMIT) == -1)
                     return -1;
 
                 if ((argI = va_arg(ap, long long *)) != NULL) {
@@ -339,7 +357,7 @@ static int mc_unpackv(ByteBuffer buffer, const char *fmt, va_list ap) {
                 args_len = va_arg(ap, size_t);
                 args = va_arg(ap, char *);
 
-                if (var_read(&buffer, &string_len, VARINT_LIMIT) == -1)
+                if (mc_var_read(&buffer, &string_len, VARINT_LIMIT) == -1)
                     return -1;
 
                 if (get_left_data(buffer) < string_len)
