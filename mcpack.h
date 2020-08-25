@@ -28,6 +28,7 @@ int mc_unpack_raw(unsigned char *buf, size_t sz, const char *fmt, ...);
 
 MCBuffer    mcbuffer_new();
 MCBuffer    mcbuffer_new_static(unsigned char *data, size_t size);
+MCBuffer    mcbuffer_make(unsigned char *data, size_t size);
 void        mcbuffer_free(MCBuffer *buffer);
 
 #define VARINT_LIMIT 5

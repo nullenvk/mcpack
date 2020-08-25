@@ -42,6 +42,14 @@ MCBuffer mcbuffer_new_static(unsigned char *data, size_t size) {
     return buffer;
 }
 
+MCBuffer mcbuffer_make(unsigned char *data, size_t size) {
+    MCBuffer buffer = mcbuffer_new_static(data, size);
+
+    buffer.size = size;
+
+    return buffer;
+}
+
 static void mcbuffer_init_alloc(MCBuffer *buffer) {
     if (buffer->allocate)
         buffer->data = malloc(1);
