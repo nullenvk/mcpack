@@ -1,4 +1,4 @@
-# obsidian-serialize - a Minecraft 1.12.2 protocol serialization library
+# mcpack - a Minecraft 1.12.2 protocol serialization library
 
 ## Usage:
 
