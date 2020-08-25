@@ -26,7 +26,7 @@ int test_set_equal(struct test_set a, struct test_set b) {
 }
 
 int main() {
-    ByteBuffer buf;
+    MCBuffer buf;
 
     struct test_set tests, original;
 
@@ -68,7 +68,7 @@ int main() {
         return -1;
     }
 
-    bytebuffer_free(&buf);
+    mcbuffer_free(&buf);
 
     return 0;
 }

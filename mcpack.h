@@ -14,10 +14,10 @@ typedef struct {
     size_t allocated_size, size, read_ptr;
 
     bool allocate, used;
-} ByteBuffer;
+} MCBuffer;
 
-int mc_pack(ByteBuffer *buffer, const char *fmt, ...);
-int mc_unpack(ByteBuffer buffer, const char *fmt, ...);
+int mc_pack(MCBuffer *buffer, const char *fmt, ...);
+int mc_unpack(MCBuffer buffer, const char *fmt, ...);
 int mc_unpack_raw(unsigned char *buf, size_t sz, const char *fmt, ...);
 
 
@@ -26,10 +26,10 @@ int mc_unpack_raw(unsigned char *buf, size_t sz, const char *fmt, ...);
  * make  - create a buffer containing existing data
  */ 
 
-ByteBuffer *bytebuffer_new();
-void        bytebuffer_new_static(ByteBuffer *buffer, unsigned char *data, size_t size);
-void        bytebuffer_make(ByteBuffer *buffer, unsigned char *data, size_t size);
-void        bytebuffer_free(ByteBuffer *buffer);
+MCBuffer   *mcbuffer_new();
+void        mcbuffer_new_static(MCBuffer *buffer, unsigned char *data, size_t size);
+void        mcbuffer_make(MCBuffer *buffer, unsigned char *data, size_t size);
+void        mcbuffer_free(MCBuffer *buffer);
 
 #define VARINT_LIMIT 5
 #define VARLONG_LIMIT 10
