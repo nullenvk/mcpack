@@ -4,7 +4,7 @@
 #include <string.h>
 #include <stdint.h>
 
-#include "../obsidian_serialize.h"
+#include "../mcpack.h"
 
 
 struct test_set {

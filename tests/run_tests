@@ -4,7 +4,7 @@ export LD_LIBRARY_PATH=..
 
 for x in *.c
 do
-    cc -I .. $x -L .. -lobsidian_serialize
+    cc -I .. $x -L .. -lmcpack
     ./a.out
 
     if [ $? -eq 0 ]
