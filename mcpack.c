@@ -16,26 +16,30 @@
 #define htonll(x) ((1==htonl(1)) ? (x) : ((uint64_t)htonl((x) & 0xFFFFFFFF) << 32) | htonl((x) >> 32))
 #define ntohll(x) ((1==ntohl(1)) ? (x) : ((uint64_t)ntohl((x) & 0xFFFFFFFF) << 32) | ntohl((x) >> 32))
 
-MCBuffer *mcbuffer_new() {
-    MCBuffer *buffer = malloc(sizeof(MCBuffer));
+MCBuffer mcbuffer_new() {
+    MCBuffer buffer; 
 
-    buffer->allocate = true;
-    buffer->used = false;
-    buffer->data = NULL;
-    buffer->size = 0;
-    buffer->allocated_size = 0;
-    buffer->read_ptr = 0;
+    buffer.allocate = true;
+    buffer.used = false;
+    buffer.data = NULL;
+    buffer.size = 0;
+    buffer.allocated_size = 0;
+    buffer.read_ptr = 0;
 
     return buffer;
 }
 
-void mcbuffer_new_static(MCBuffer *buffer, unsigned char *data, size_t size) {
-    buffer->allocate = false;
-    buffer->used = false;
-    buffer->data = data;
-    buffer->size = 0;
-    buffer->allocated_size = size;
-    buffer->read_ptr = 0;
+MCBuffer mcbuffer_new_static(unsigned char *data, size_t size) {
+    MCBuffer buffer;
+
+    buffer.allocate = false;
+    buffer.used = false;
+    buffer.data = data;
+    buffer.size = 0;
+    buffer.allocated_size = size;
+    buffer.read_ptr = 0;
+
+    return buffer;
 }
 
 static void mcbuffer_init_alloc(MCBuffer *buffer) {

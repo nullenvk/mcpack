@@ -1,8 +1,39 @@
 # mcpack - a Minecraft 1.12.2 protocol serialization library
 
-## Usage:
+## About
 
-TODO: Write usage
+This library is meant for serializing and deserializing data from Minecraft's networking
+protocol. However, it doesn't implement anything related to packets, because that'd
+require both use of dynamic memory allocation and external dependencies (which we'd like to
+avoid). If you'd like to handle packet decoding/encoding/compression/encryption, you should
+either write your own wrapper functions around this library or use another library implementing it.
+I might make a separate library for that later on.
+
+Here are some features of this library:
+
+* Rather small (<1K LOC)
+* Supports usage without dynamic memory allocation
+* No external dependencies
+
+## Usage
+
+`MCBuffer` is the most basic structure in mcpack library, meant for describing the output/input
+buffer for unpack/pack functions. Moreover, it allows you to specify whether you'd like to
+dynamically allocate the data buffer or use a static one. In order to create a MCBuffer, you
+have to use either the `mcbuffer_new` or the `mcbuffer_new_static` functions. After you're
+finished with using a buffer, you can clean it up with `mcbuffer_free` (if it's a static buffer,
+it won't clean up the data).
+In order to deserialize data from a buffer, you have to first create a MCBuffer with use of
+`mcbuffer_make`, which will encapsulate your data for this purpose. Then, you have to use
+`mc_unpack` function on it with proper format data. If you'd like to use just one function
+instead of two, you can also use `mc_unpack_raw`, which can use raw byte arrays.
+In order to serialize data, you have to set up a new mcbuffer. Then, you have to use `mc_pack` on
+it. Afterwards, you should be able to read the data by accessing structure's `data` field.
+Output size will be available through the `size` field.
+
+### Return codes
+
+If any of these functions fails, it should return `-1`.
 
 ### Format specification
 
