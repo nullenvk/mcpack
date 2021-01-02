@@ -14,10 +14,10 @@ typedef struct {
     size_t allocated_size, size, read_ptr;
 
     bool allocate, used;
-} MCBuffer;
+} mc_buffer_t;
 
-int mc_pack(MCBuffer *buffer, const char *fmt, ...);
-int mc_unpack(MCBuffer buffer, const char *fmt, ...);
+int mc_pack(mc_buffer_t *buffer, const char *fmt, ...);
+int mc_unpack(mc_buffer_t buffer, const char *fmt, ...);
 int mc_unpack_raw(unsigned char *buf, size_t sz, const char *fmt, ...);
 
 
@@ -26,7 +26,7 @@ int mc_unpack_raw(unsigned char *buf, size_t sz, const char *fmt, ...);
  * make  - create a buffer containing existing data
  */ 
 
-MCBuffer    mcbuffer_new();
-MCBuffer    mcbuffer_new_static(unsigned char *data, size_t size);
-MCBuffer    mcbuffer_make(unsigned char *data, size_t size);
-void        mcbuffer_free(MCBuffer *buffer);
+mc_buffer_t     mc_buffer_new();
+mc_buffer_t     mc_buffer_new_static(unsigned char *data, size_t size);
+mc_buffer_t     mc_buffer_make(unsigned char *data, size_t size);
+void            mc_buffer_free(mc_buffer_t *buffer);
