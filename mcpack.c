@@ -74,12 +74,13 @@ int mc_buffer_require_size(mc_buffer_t *buffer, size_t size) {
 }
 
 void mc_buffer_free(mc_buffer_t *buffer) {
-    if (buffer->used && buffer->allocate)
+    if (buffer->used && buffer->allocate) {
         free(buffer->data);
+        buffer->allocated_size = 0;
+    }
 
     buffer->used = 0;
     buffer->size = 0;
-    buffer->allocated_size = 0;
 }
 
 static int mc_buffer_append(mc_buffer_t *buf, unsigned char byte) {
