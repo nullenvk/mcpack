@@ -74,7 +74,7 @@ int mc_buffer_require_size(mc_buffer_t *buffer, size_t size) {
 }
 
 void mc_buffer_free(mc_buffer_t *buffer) {
-    if (buffer->used)
+    if (buffer->used && buffer->allocate)
         free(buffer->data);
 
     buffer->used = 0;
