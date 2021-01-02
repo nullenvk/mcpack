@@ -1,28 +1,39 @@
+PREFIX ?= /usr/local
+AR ?= ar
+CC ?= clang
+
 CFLAGS := -Wall -Wextra -fstack-protector-strong -O2 -pipe \
     -Werror=format-security -I/usr/local/include
 LDFLAGS :=
 
-AR ?= ar
-CC ?= clang
-
-LIB_STATIC := libmcpack.a
-LIB_SHARED := libmcpack.so
 OBJ = mcpack.o 
 
-all: $(LIB_SHARED) $(LIB_STATIC)
+all: libmcpack.so libmcpack.a
 
-$(LIB_SHARED): $(OBJ)
+libmcpack.so: $(OBJ)
 	$(CC) -shared $(LDFLAGS) -o $@ $(OBJ) 
 
 
-$(LIB_STATIC): $(OBJ)
+libmcpack.a: $(OBJ)
 	$(AR) rcs $@ $(OBJ)
 
 .c.o:
 	$(CC) $(CFLAGS) -fPIC -c $< -o $@
 
 clean:
-	-rm -r $(LIB_SHARED) $(LIB_STATIC) $(OBJ)
+	-rm -r libmcpack.a libmcpack.so $(OBJ)
 
-.PHONY: clean
+install:
+	mkdir -p $(PREFIX)/lib
+	mkdir -p $(PREFIX)/include
+	install -m 0755 libmcpack.so $(PREFIX)/lib
+	install -m 0755 libmcpack.a $(PREFIX)/lib
+	install -m 0644 mcpack.h $(PREFIX)/include
+
+uninstall:
+	-rm -f $(PREFIX)/lib/libmcpack.so 
+	-rm -f $(PREFIX)/lib/libmcpack.a 
+	-rm -f $(PREFIX)/include/mcpack.h
+
+.PHONY: clean install uninstall
 .SUFFIXES: .c .o
