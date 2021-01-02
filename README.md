@@ -17,17 +17,17 @@ Here are some features of this library:
 
 ## Usage
 
-`MCBuffer` is the most basic structure in mcpack library, meant for describing the output/input
+`mc_buffer_t` is the most basic structure in mcpack library, meant for describing the output/input
 buffer for unpack/pack functions. Moreover, it allows you to specify whether you'd like to
-dynamically allocate the data buffer or use a static one. In order to create a MCBuffer, you
-have to use either the `mcbuffer_new` or the `mcbuffer_new_static` functions. After you're
-finished with using a buffer, you can clean it up with `mcbuffer_free` (if it's a static buffer,
+dynamically allocate the data buffer or use a static one. In order to create a `mc_buffer_t`, you
+have to use either the `mc_buffer_new` or the `mc_buffer_new_static` functions. After you're
+finished with using a buffer, you can clean it up with `mc_buffer_free` (if it's a static buffer,
 it won't clean up the data).
-In order to deserialize data from a buffer, you have to first create a MCBuffer with use of
-`mcbuffer_make`, which will encapsulate your data for this purpose. Then, you have to use
+In order to deserialize data from a buffer, you have to first create a `mc_buffer_t` with use of
+`mc_buffer_make`, which will encapsulate your data for this purpose. Then, you have to use
 `mc_unpack` function on it with proper format data. If you'd like to use just one function
 instead of two, you can also use `mc_unpack_raw`, which can use raw byte arrays.
-In order to serialize data, you have to set up a new mcbuffer. Then, you have to use `mc_pack` on
+In order to serialize data, you have to set up a new `mc_buffer_t`. Then, you have to use `mc_pack` on
 it. Afterwards, you should be able to read the data by accessing structure's `data` field.
 Output size will be available through the `size` field.
 
