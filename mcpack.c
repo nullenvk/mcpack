@@ -169,7 +169,7 @@ int mc_var_read(mc_buffer_t *buf, long long *result, int limit) {
     return num_read;
 }
 
-static int mc_packv(mc_buffer_t *buffer, const char *fmt, va_list ap) {
+int mc_packv(mc_buffer_t *buffer, const char *fmt, va_list ap) {
     mc_buffer_init_alloc(buffer);
 
     for(size_t i = 0; i < strlen(fmt); i++) {
