@@ -282,7 +282,7 @@ static size_t get_left_data_read(mc_buffer_t buffer) {
     return buffer.size - buffer.read_ptr;
 }
 
-static int mc_unpackv(mc_buffer_t buffer, const char *fmt, va_list ap) {
+int mc_unpackv(mc_buffer_t buffer, const char *fmt, va_list ap) {
     for(size_t i = 0; i < strlen(fmt); i++) {
 
         //curflags = fmtflags;

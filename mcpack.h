@@ -20,6 +20,7 @@ int mc_pack(mc_buffer_t *buffer, const char *fmt, ...);
 int mc_packv(mc_buffer_t *buffer, const char *fmt, va_list ap); 
 
 int mc_unpack(mc_buffer_t buffer, const char *fmt, ...);
+int mc_unpackv(mc_buffer_t buffer, const char *fmt, va_list ap);
 int mc_unpack_raw(unsigned char *buf, size_t sz, const char *fmt, ...);
 
 
