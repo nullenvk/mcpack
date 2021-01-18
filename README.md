@@ -48,5 +48,6 @@ described in the following table:
 | 8         | `long` | Fixed size 64-bit value |
 | i         | `int` | Varint - variable size value (max 5 bytes)
 | I         | `long` | Varlong - variable size value (max 10 bytes)
-| s         | `char*` | NULL-terminated string (with prepended size in varint) |
+| s         | `char*` | NULL-terminated string (with prepended size in varint). Dynamically
+allocated when unpacked |
 
