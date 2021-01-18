@@ -240,10 +240,6 @@ int mc_packv(mc_buffer_t *buffer, const char *fmt, va_list ap) {
                 memcpy(buffer->data + buffer->size, args, args_len); 
                 buffer->size += args_len;
                 break;
-
-                // Raw bytes (size + pointer)
-                //case '=':
-                //break;
         };
 
         if(buf_err == -1)
@@ -294,8 +290,7 @@ int mc_unpackv(mc_buffer_t buffer, const char *fmt, va_list ap) {
         uint64_t *arg8;
         int      *argi;
         long long *argI;
-        char     *args;
-        size_t   args_len;
+        char     **args;
 
         long long argi_val, string_len;
 
@@ -375,8 +370,7 @@ int mc_unpackv(mc_buffer_t buffer, const char *fmt, va_list ap) {
 
                 // String
             case 's':
-                args_len = va_arg(ap, size_t);
-                args = va_arg(ap, char *);
+                args = va_arg(ap, char **);
 
                 if (mc_var_read(&buffer, &string_len, VARINT_LIMIT) == -1)
                     return -1;
@@ -384,16 +378,13 @@ int mc_unpackv(mc_buffer_t buffer, const char *fmt, va_list ap) {
                 if (get_left_data_read(buffer) < (size_t)string_len)
                     return -1;
 
-                if (args != NULL)
-                    strncpy(args, (const char*)buffer.data + buffer.size, args_len);
+                *args = malloc(string_len + 1);
+                (*args)[string_len] = '\0';
+                strncpy(*args, (const char*)buffer.data + buffer.read_ptr, string_len);
 
                 buffer.read_ptr += string_len;
 
                 break;
-
-                // Raw bytes (size + pointer)
-                //case '=':
-                //break;
         };
 
         if(buffer.read_ptr > buffer.size) {
