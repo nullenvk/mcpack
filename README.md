@@ -49,5 +49,5 @@ described in the following table:
 | i         | `int` | Varint - variable size value (max 5 bytes)
 | I         | `long` | Varlong - variable size value (max 10 bytes)
 | s         | `char*` | NULL-terminated string (with prepended size in varint). Dynamically allocated when unpacked |
-| B (TODO)  | `size_t, unsigned char*` | Varint-prepended byte array. Dynamically allocated when unpacked|
+| B (TODO)  | `long long, unsigned char*` | Varint-prepended byte array. Dynamically allocated when unpacked|
 

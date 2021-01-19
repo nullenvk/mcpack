@@ -185,6 +185,8 @@ int mc_packv(mc_buffer_t *buffer, const char *fmt, va_list ap) {
 
         const char *args;
         size_t args_len;
+        const unsigned char *argB;
+        long long argB_len;
 
         switch(fmt[i]) {
 
@@ -240,6 +242,17 @@ int mc_packv(mc_buffer_t *buffer, const char *fmt, va_list ap) {
                 memcpy(buffer->data + buffer->size, args, args_len); 
                 buffer->size += args_len;
                 break;
+            
+                // Byte Array
+            case 'B':
+                argB_len = va_arg(ap, long long);
+                argB = va_arg(ap, const unsigned char *);
+                if(var_append(buffer, argB_len, VARINT_LIMIT) == -1)
+                    return -1;
+                mc_buffer_require_size(buffer, argB_len);
+                memcpy(buffer->data + buffer->size, argB, argB_len); 
+                buffer->size += argB_len;
+                break;
         };
 
         if(buf_err == -1)
@@ -291,6 +304,8 @@ int mc_unpackv(mc_buffer_t buffer, const char *fmt, va_list ap) {
         int      *argi;
         long long *argI;
         char     **args;
+        unsigned char **argB;
+        long long     *argB_len;
 
         long long argi_val, string_len;
 
@@ -383,6 +398,23 @@ int mc_unpackv(mc_buffer_t buffer, const char *fmt, va_list ap) {
                 strncpy(*args, (const char*)buffer.data + buffer.read_ptr, string_len);
 
                 buffer.read_ptr += string_len;
+
+                break;
+                // Byte array
+            case 'B':
+                argB_len = va_arg(ap, long long*);
+                argB = va_arg(ap, unsigned char**);
+
+                if (mc_var_read(&buffer, argB_len, VARINT_LIMIT) == -1)
+                    return -1;
+
+                if (get_left_data_read(buffer) < (size_t)*argB_len)
+                    return -1;
+
+                *argB = malloc(*argB_len);
+                memcpy(*argB, (const unsigned char*)buffer.data + buffer.read_ptr, *argB_len);
+
+                buffer.read_ptr += *argB_len;
 
                 break;
         };
