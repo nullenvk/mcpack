@@ -393,9 +393,11 @@ int mc_unpackv(mc_buffer_t buffer, const char *fmt, va_list ap) {
                 if (get_left_data_read(buffer) < (size_t)string_len)
                     return -1;
 
-                *args = malloc(string_len + 1);
-                (*args)[string_len] = '\0';
-                strncpy(*args, (const char*)buffer.data + buffer.read_ptr, string_len);
+                if(args != NULL) {
+                    *args = malloc(string_len + 1);
+                    (*args)[string_len] = '\0';
+                    strncpy(*args, (const char*)buffer.data + buffer.read_ptr, string_len);
+                }
 
                 buffer.read_ptr += string_len;
 
@@ -405,16 +407,21 @@ int mc_unpackv(mc_buffer_t buffer, const char *fmt, va_list ap) {
                 argB_len = va_arg(ap, long long*);
                 argB = va_arg(ap, unsigned char**);
 
-                if (mc_var_read(&buffer, argB_len, VARINT_LIMIT) == -1)
+                if (mc_var_read(&buffer, &string_len, VARINT_LIMIT) == -1)
                     return -1;
 
-                if (get_left_data_read(buffer) < (size_t)*argB_len)
+                if(argB_len != NULL)
+                    *argB_len = string_len;
+
+                if (get_left_data_read(buffer) < (size_t)string_len)
                     return -1;
 
-                *argB = malloc(*argB_len);
-                memcpy(*argB, (const unsigned char*)buffer.data + buffer.read_ptr, *argB_len);
+                if(argB != NULL) {
+                    *argB = malloc(string_len);
+                    memcpy(*argB, (const unsigned char*)buffer.data + buffer.read_ptr, string_len);
+                }
 
-                buffer.read_ptr += *argB_len;
+                buffer.read_ptr += string_len;
 
                 break;
         };
